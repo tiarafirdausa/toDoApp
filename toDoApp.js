@@ -2,8 +2,57 @@ const readline = require("node:readline");
 const { stdin: input, stdout: output } = require("node:process");
 const rl = readline.createInterface({ input, output });
 
-// Array to store the todos
-let todos = [];
+function createTodoManager() {
+  let todos = [];
+  return {
+    // Function to add a new todo
+    addTodo: (todo) => {
+      if (todo.trim() === "") {
+        console.log("Todo cannot be empty");
+      } else {
+        todos.push({ text: todo, done: false });
+        console.log("Todo added successfully");
+      }
+    },
+    // Function to show all todos
+    showTodos: () => {
+      console.log("\n== Todos: ==");
+      if (todos.length === 0) {
+        console.log("No todos to show");
+      } else {
+        todos.forEach((todo, index) => {
+          console.log(`${index + 1}. [${todo.done ? "x" : " "}] ${todo.text}`);
+        });
+      }
+    },
+    // Function to delete a todo
+    deleteTodo: (index) => {
+      index = parseInt(index) - 1;
+      if (index >= 0 && index < todos.length) {
+        todos.splice(index, 1);
+        console.log("Todo deleted successfully");
+      } else {
+        console.log("Invalid todo number");
+      }
+    },
+    // Function to mark/unmark a todo as done
+    markTodo: (index) => {
+      index = parseInt(index) - 1;
+      if (index >= 0 && index < todos.length) {
+        todos[index].done = !todos[index].done;
+        console.log("Todo marked/unmarked successfully");
+      } else {
+        console.log("Invalid todo number");
+      }
+    },
+  };
+}
+
+const todoManager = createTodoManager();
+
+function handleUserInput(question, callback) {
+  rl.question(question, callback);
+}
 
 // Function to show the menu
 function showMenu() {
@@ -13,19 +62,30 @@ function showMenu() {
   console.log("3. Delete Todo");
   console.log("4. Mark Todo");
   console.log("5. Exit");
-  rl.question("Choose an option: ", function (option) {
+
+  handleUserInput("Choose an option: ", (option) => {
     switch (option) {
       case "1":
-        addTodo();
+        handleUserInput("Enter a new todo: ", (todo) => {
+          todoManager.addTodo(todo);
+          showMenu();
+        });
         break;
       case "2":
-        showTodos();
+        todoManager.showTodos();
+        showMenu();
         break;
       case "3":
-        deleteTodo();
+        handleUserInput("Enter the todo number to delete: ", (index) => {
+          todoManager.deleteTodo(index);
+          showMenu();
+        });
         break;
       case "4":
-        markTodo();
+        handleUserInput("Enter the number of the todo to mark/unmark: ", (index) => {
+          todoManager.markTodo(index);
+          showMenu();
+        });
         break;
       case "5":
         console.log("Thanks for using the app");
@@ -35,61 +95,6 @@ function showMenu() {
         console.log("Invalid option");
         showMenu();
     }
-  });
-}
-
-// Function to add a new todo
-function addTodo() {
-  rl.question("Enter a new todo: ", function (todo) {
-    if (todo.trim() === "") {
-      console.log("Todo cannot be empty");
-    } else {
-      todos.push({ text: todo, done: false });
-      console.log("Todo added successfully");
-    }
-    showMenu();
-  });
-}
-
-// Function to show all todos
-function showTodos() {
-  console.log("\n== Todos: ==");
-  if (todos.length === 0) {
-    console.log("No todos to show");
-  } else {
-    todos.forEach((todo, index) => {
-      const status = todo.done ? "[x]" : "[ ]";
-      console.log(`${index + 1}. ${status} ${todo.text}`);
-    });
-  }
-  showMenu();
-}
-
-// Function to delete a todo
-function deleteTodo() {
-  rl.question("Enter the number of the todo to delete: ", function (index) {
-    index = parseInt(index) - 1;
-    if (index >= 0 && index < todos.length) {
-      todos.splice(index, 1);
-      console.log("Todo deleted successfully");
-    } else {
-      console.log("Invalid todo number");
-    }
-    showMenu();
-  });
-}
-
-// Function to mark/unmark a todo as done
-function markTodo() {
-  rl.question("Enter the number of the todo to mark/unmark: ", function (index) {
-    index = parseInt(index) - 1;
-    if (index >= 0 && index < todos.length) {
-      todos[index].done = !todos[index].done;
-      console.log("Todo marked/unmarked successfully");
-    } else {
-      console.log("Invalid todo number");
-    }
-    showMenu();
   });
 }
 
